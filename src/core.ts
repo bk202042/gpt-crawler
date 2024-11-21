@@ -1,5 +1,7 @@
 // For more information, see https://crawlee.dev/
 import { Configuration, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
+import { CrawlerError, withRetry } from "./utils/errors.js";
+import { RateLimiter } from "./utils/helpers.js";
 import { readFile, writeFile } from "fs/promises";
 import { glob } from "glob";
 import { Config, configSchema } from "./config.js";
@@ -50,6 +52,8 @@ export async function waitForXPath(page: Page, xpath: string, timeout: number) {
 
 export async function crawl(config: Config) {
   configSchema.parse(config);
+  
+  const rateLimiter = new RateLimiter(config.requestDelay ?? 1000);
 
   if (process.env.NO_CRAWL !== "true") {
     // PlaywrightCrawler crawls the web using a headless
@@ -58,7 +62,16 @@ export async function crawl(config: Config) {
       {
         // Use the requestHandler to process each of the crawled pages.
         async requestHandler({ request, page, enqueueLinks, log, pushData }) {
-          const title = await page.title();
+          await rateLimiter.waitForNext();
+          
+          const title = await withRetry(async () => {
+            try {
+              return await page.title();
+            } catch (error) {
+              throw new CrawlerError(`Failed to get page title: ${error.message}`, request.loadedUrl);
+            }
+          });
+          
           pageCounter++;
           log.info(
             `Crawling: Page ${pageCounter} / ${config.maxPagesToCrawl} - URL: ${request.loadedUrl}...`,
