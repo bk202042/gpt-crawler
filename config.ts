@@ -1,8 +1,8 @@
 import { Config } from "./src/config";
 
 export const defaultConfig: Config = {
-  url: "https://firebase.google.com/codelabs/ai-genkit-rag#0",
-  match: "https://firebase.google.com/codelabs/**",
+  url: "https://nextjs.org/docs/app/building-your-application/routing",
+  match: "https://nextjs.org/docs/app/building-your-application/routing/**",
   maxPagesToCrawl: 2000,
   outputFileName: "output.md",
   maxTokens: 2000000,
