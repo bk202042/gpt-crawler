@@ -39,7 +39,7 @@ export function getPageHtml(page: Page, selector = "body") {
       // Get only the main content
       const mainContent = el.querySelector('main, article, [role="main"]') || el;
       
-      return mainContent.innerText || "";
+      return (mainContent as HTMLElement).innerText || "";
     }
   }, selector);
 }
