@@ -6,6 +6,6 @@ export const defaultConfig: Config = {
   maxPagesToCrawl: 2000,
   outputFileName: "output.md",
   maxTokens: 2000000,
-  selector: "main.docs-content", // Target Next.js docs main content area
-  waitForSelectorTimeout: 5000, // Increase timeout to 5 seconds
+  selector: "main[class^='docs_main']", // Target Next.js docs main content area
+  waitForSelectorTimeout: 10000, // Increase timeout to 10 seconds
 };

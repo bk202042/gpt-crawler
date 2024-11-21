@@ -89,6 +89,9 @@ export async function crawl(config: Config) {
           );
 
           // Use custom handling for XPath selector
+          // Wait for network idle first
+          await page.waitForLoadState('networkidle');
+          
           if (config.selector) {
             if (config.selector.startsWith("/")) {
               await waitForXPath(
@@ -99,6 +102,7 @@ export async function crawl(config: Config) {
             } else {
               await page.waitForSelector(config.selector, {
                 timeout: config.waitForSelectorTimeout ?? 1000,
+                state: 'attached'
               });
             }
           }
