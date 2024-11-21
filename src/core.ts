@@ -89,21 +89,47 @@ export async function crawl(config: Config) {
           );
 
           // Use custom handling for XPath selector
-          // Wait for network idle first
-          await page.waitForLoadState('networkidle');
-          
+          // Wait for multiple conditions to ensure page is ready
+          await Promise.all([
+            page.waitForLoadState('networkidle'),
+            page.waitForLoadState('domcontentloaded'),
+            page.waitForLoadState('load')
+          ]);
+
           if (config.selector) {
-            if (config.selector.startsWith("/")) {
-              await waitForXPath(
-                page,
-                config.selector,
-                config.waitForSelectorTimeout ?? 1000,
-              );
-            } else {
-              await page.waitForSelector(config.selector, {
-                timeout: config.waitForSelectorTimeout ?? 1000,
-                state: 'attached'
-              });
+            try {
+              if (config.selector.startsWith("/")) {
+                await waitForXPath(
+                  page,
+                  config.selector,
+                  config.waitForSelectorTimeout ?? 1000,
+                );
+              } else {
+                // Try multiple selector variations
+                const selectors = [
+                  config.selector,
+                  `${config.selector}[class*="docs"]`,
+                  `${config.selector}[class*="content"]`,
+                  'article',
+                  '[role="main"]'
+                ];
+
+                for (const selector of selectors) {
+                  try {
+                    await page.waitForSelector(selector, {
+                      timeout: config.waitForSelectorTimeout ?? 1000,
+                      state: 'attached'
+                    });
+                    config.selector = selector; // Update selector to the working one
+                    break;
+                  } catch (e) {
+                    continue;
+                  }
+                }
+              }
+            } catch (error) {
+              console.warn(`Warning: Failed to find content with specified selectors, falling back to body`);
+              config.selector = 'body';
             }
           }
 
