@@ -85,6 +85,11 @@ export const configSchema = z.object({
    * @example 5000
    */
   maxTokens: z.number().int().positive().optional(),
+  /**
+   * Optional delay between requests in milliseconds
+   * @default 1000
+   */
+  requestDelay: z.number().int().nonnegative().optional(),
 });
 
 export type Config = z.infer<typeof configSchema>;
