@@ -1,5 +1,6 @@
 // For more information, see https://crawlee.dev/
 import { Configuration, PlaywrightCrawler, downloadListOfUrls } from "crawlee";
+import { formatAsMarkdown } from "./utils/markdown.js";
 import { CrawlerError, withRetry } from "./utils/errors.js";
 import { RateLimiter } from "./utils/helpers.js";
 import { readFile, writeFile } from "fs/promises";
@@ -174,6 +175,9 @@ export async function write(config: Config) {
     absolute: true,
   });
 
+  // Change output extension from .json to .md
+  config.outputFileName = config.outputFileName.replace(/\.json$/, '.md');
+
   console.log(`Found ${jsonFiles.length} files to combine...`);
 
   let currentResults: Record<string, any>[] = [];
@@ -190,11 +194,11 @@ export async function write(config: Config) {
     `${config.outputFileName.replace(/\.json$/, "")}-${fileCounter}.json`;
 
   const writeBatchToFile = async (): Promise<void> => {
-    nextFileNameString = nextFileName();
-    await writeFile(
-      nextFileNameString,
-      JSON.stringify(currentResults, null, 2),
-    );
+    nextFileNameString = nextFileName().replace(/\.json$/, '.md');
+    const markdownContent = currentResults
+      .map(result => formatAsMarkdown(result))
+      .join('\n');
+    await writeFile(nextFileNameString, markdownContent);
     console.log(
       `Wrote ${currentResults.length} items to ${nextFileNameString}`,
     );
