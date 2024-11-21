@@ -69,7 +69,7 @@ export async function crawl(config: Config) {
             try {
               return await page.title();
             } catch (error) {
-              throw new CrawlerError(`Failed to get page title: ${error.message}`, request.loadedUrl);
+              throw new CrawlerError(`Failed to get page title: ${(error as Error).message}`, request.loadedUrl);
             }
           });
           
