@@ -6,4 +6,5 @@ export const defaultConfig: Config = {
   maxPagesToCrawl: 2000,
   outputFileName: "output.md",
   maxTokens: 2000000,
+  selector: "main[class*='docs-content']", // Target Next.js docs main content area
 };

@@ -29,7 +29,17 @@ export function getPageHtml(page: Page, selector = "body") {
     } else {
       // Handle as a CSS selector
       const el = document.querySelector(selector) as HTMLElement | null;
-      return el?.innerText || "";
+      
+      if (!el) return "";
+
+      // Remove navigation, header, footer elements
+      const elementsToRemove = el.querySelectorAll('nav, header, footer, aside, .navigation, .menu, .sidebar');
+      elementsToRemove.forEach(element => element.remove());
+
+      // Get only the main content
+      const mainContent = el.querySelector('main, article, [role="main"]') || el;
+      
+      return mainContent.innerText || "";
     }
   }, selector);
 }
