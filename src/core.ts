@@ -190,6 +190,11 @@ export async function write(config: Config) {
 
   console.log(`Found ${jsonFiles.length} files to combine...`);
 
+  if (jsonFiles.length === 0) {
+    console.warn("No files found to process. The crawler may have failed to collect any data.");
+    return "";
+  }
+
   let currentResults: Record<string, any>[] = [];
   let currentSize: number = 0;
   let fileCounter: number = 1;
